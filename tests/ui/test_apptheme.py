@@ -1,4 +1,4 @@
-"""Theme selection: the dark palette is dark, and toggling flips between light and dark."""
+"""Theme selection: the dark palette is dark, and toggling cycles through dark → light → glass."""
 
 from __future__ import annotations
 
@@ -14,18 +14,22 @@ def test_dark_palette_uses_a_dark_window_colour(qt_app: QApplication) -> None:
     assert palette.color(QPalette.ColorRole.Window).lightness() < 128
 
 
-def test_next_theme_flips_light_and_dark() -> None:
+def test_next_theme_cycles_dark_light_glass() -> None:
     assert next_theme(Theme.DARK) is Theme.LIGHT
-    assert next_theme(Theme.LIGHT) is Theme.DARK
+    assert next_theme(Theme.LIGHT) is Theme.GLASS
+    assert next_theme(Theme.GLASS) is Theme.DARK
     assert next_theme(Theme.SYSTEM) is Theme.DARK
 
 
-def test_controller_toggles_between_dark_and_light(qt_app: QApplication) -> None:
+def test_controller_cycles_through_all_non_system_themes(qt_app: QApplication) -> None:
     controller = ThemeController(qt_app, Theme.DARK)
     assert controller.theme is Theme.DARK
 
     controller.toggle()
     assert controller.theme is Theme.LIGHT
+
+    controller.toggle()
+    assert controller.theme is Theme.GLASS
 
     controller.toggle()
     assert controller.theme is Theme.DARK
