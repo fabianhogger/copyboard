@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 from copyboard.adapters.ui.clippingwidget import ClippingWidget
 from copyboard.application.copyboardservice import CopyboardService
 from copyboard.application.events import HistoryChangeEvent
+from copyboard.config import UIConfig
 
 _DEFAULT_PRUNE_INTERVAL_MS = 1000
 
@@ -26,10 +27,12 @@ class MainWindow(QWidget):
     def __init__(
         self,
         service: CopyboardService,
+        ui_config: UIConfig | None = None,
         prune_interval_ms: int = _DEFAULT_PRUNE_INTERVAL_MS,
     ) -> None:
         super().__init__()
         self._service = service
+        self._ui_config = ui_config or UIConfig()
         self.setWindowTitle("Copyboard")
         self.resize(420, 560)
 
@@ -83,6 +86,7 @@ class MainWindow(QWidget):
                     clipping,
                     self._service.recopy_clipping_by_id,
                     self._service.delete_clipping_by_id,
+                    actions_on_right_click=self._ui_config.actions_on_right_click,
                 )
             )
         self._list_layout.addStretch(1)

@@ -73,7 +73,7 @@ def main() -> int:
     source = QtClipboardSource(clipboard, echo_guard)
     source.set_new_content_listener(service.handle_new_clipboard_content)
 
-    window = MainWindow(service)
+    window = MainWindow(service, config.ui)
     # ThemeController is created after the window so it can apply WA_TranslucentBackground
     # before window.show(), which is required on some platforms (notably Windows).
     theme_controller = ThemeController(app, config.theme, window)

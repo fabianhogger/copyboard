@@ -1,9 +1,12 @@
 """A single row in the viewer: a clipping's preview plus Copy / Delete actions.
 
 Pure view code. It shows the clipping's ``build_preview_text`` (or, for images, a thumbnail rendered
-from the temp-file path) under a muted timestamp; the kind is deliberately not labelled. User
-actions are forwarded through injected callbacks so the widget never touches the service or domain
-logic directly.
+from the temp-file path) under a muted timestamp. User actions are forwarded through injected
+callbacks so the widget never touches the service or domain logic directly.
+
+Two interaction modes are supported (chosen at construction time):
+- **Inline buttons** (default): Copy and Delete buttons appear to the right of each row.
+- **Right-click menu**: no buttons are shown; a context menu appears on right-click instead.
 """
 
 from __future__ import annotations
@@ -11,8 +14,8 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from PySide6.QtCore import QPoint, Qt
-from PySide6.QtGui import QDrag, QMouseEvent, QPixmap
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QPixmap
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QMenu, QPushButton, QVBoxLayout, QWidget
 
 from copyboard.adapters.qt.clippingdragdata import build_drag_mime_data
 from copyboard.domain.clipping import Clipping, ImageClipping
@@ -29,6 +32,7 @@ class ClippingWidget(QWidget):
         clipping: Clipping,
         on_recopy: Callable[[str], None],
         on_delete: Callable[[str], None],
+        actions_on_right_click: bool = True,
     ) -> None:
         super().__init__()
         self._clipping_id = clipping.id
@@ -39,12 +43,11 @@ class ClippingWidget(QWidget):
 
         row = QHBoxLayout(self)
         row.addLayout(self._build_content_column(clipping), stretch=1)
-        row.addWidget(self._build_copy_button())
-        row.addWidget(self._build_delete_button())
+        if not actions_on_right_click:
+            row.addWidget(self._build_copy_button())
+            row.addWidget(self._build_delete_button())
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        # Presses that land on the Copy/Delete buttons are consumed by them and never reach here, so
-        # a drag only ever begins from the preview/content area.
         if event.button() == Qt.MouseButton.LeftButton:
             self._drag_start_position = event.position().toPoint()
 
@@ -59,16 +62,19 @@ class ClippingWidget(QWidget):
         if moved_far_enough:
             self._start_drag()
 
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+        menu = QMenu(self)
+        menu.addAction("Copy").triggered.connect(self._request_recopy)
+        menu.addAction("Delete").triggered.connect(self._request_delete)
+        menu.exec(event.globalPos())
+
     def _start_drag(self) -> None:
         self._drag_start_position = None
         drag = QDrag(self)
         drag.setMimeData(build_drag_mime_data(self._clipboard_payload))
-        # CopyAction: dragging out never removes the clipping from history.
         drag.exec(Qt.DropAction.CopyAction)
 
     def _build_content_column(self, clipping: Clipping) -> QVBoxLayout:
-        # The kind (url/path/…) is intentionally not shown — the user can tell at a glance, so the
-        # row stays uncluttered. A muted timestamp is the only chrome above the content.
         column = QVBoxLayout()
         timestamp = QLabel(f"{clipping.created_at:%H:%M:%S}")
         timestamp.setStyleSheet("color: gray; font-size: 11px;")
