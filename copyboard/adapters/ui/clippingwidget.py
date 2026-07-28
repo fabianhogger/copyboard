@@ -35,6 +35,8 @@ class ClippingWidget(QWidget):
         actions_on_right_click: bool = True,
     ) -> None:
         super().__init__()
+        # Required for Qt to paint a stylesheet `background` on a plain QWidget subclass.
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self._clipping_id = clipping.id
         self._clipboard_payload = clipping.to_clipboard_payload()
         self._on_recopy = on_recopy

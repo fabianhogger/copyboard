@@ -17,8 +17,44 @@ from copyboard.config import Theme
 
 _FUSION_STYLE = "Fusion"
 
-_GLASS_WINDOW_BG = "rgba(18, 20, 35, 212)"
-_GLASS_BORDER = "rgba(90, 130, 255, 55)"
+# Glass theme stylesheet applied to the viewer window.
+#
+# The illusion rests on three layers:
+#   1. Window gradient — a blue-white glint at the very top rim that transitions into a frosted-
+#      white body, making the window visible even when the list is empty.
+#   2. Directional borders — bright on top/left (light source), dim on right/bottom (shadow side).
+#   3. Row tiles — each ClippingWidget uses a more opaque frosted gradient so it floats above the
+#      window body with its own bright top-edge highlight.
+_GLASS_STYLESHEET = (
+    "MainWindow {"
+    "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+    "    stop:0.000 rgba(160, 200, 255, 100),"  # sky-blue glint — top rim in full light
+    "    stop:0.040 rgba(100, 145, 235,  55),"  # glow fades
+    "    stop:0.085 rgba(255, 255, 255,  28),"  # transitions to frosted-white body
+    "    stop:0.500 rgba(255, 255, 255,  18),"  # mid-body
+    "    stop:1.000 rgba(255, 255, 255,  10));" # slight lift toward the bottom (reflected table)
+    "  border-top:    1px solid rgba(200, 225, 255, 160);"  # lit rim
+    "  border-left:   1px solid rgba(150, 185, 255,  90);"
+    "  border-right:  1px solid rgba( 80, 115, 210,  60);"
+    "  border-bottom: 1px solid rgba( 55,  85, 185,  55);"
+    "  border-radius: 7px;"
+    "}"
+    "QScrollArea { background: transparent; border: none; }"
+    "QScrollArea > QWidget > QWidget { background: transparent; }"
+    # Row tiles — more opaque than the window body so they visibly float above it.
+    "ClippingWidget {"
+    "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+    "    stop:0.0 rgba(255, 255, 255, 42),"
+    "    stop:0.4 rgba(255, 255, 255, 22),"
+    "    stop:1.0 rgba(255, 255, 255, 10));"
+    "  border-top:    1px solid rgba(255, 255, 255, 70);"  # top highlight — catches light
+    "  border-left:   1px solid rgba(255, 255, 255, 35);"
+    "  border-right:  1px solid rgba(0,   0,   0,   20);"
+    "  border-bottom: 1px solid rgba(0,   0,   0,   28);"
+    "  border-radius: 4px;"
+    "  margin: 1px 2px;"
+    "}"
+)
 
 _THEME_CYCLE: dict[Theme, Theme] = {
     Theme.DARK: Theme.LIGHT,
@@ -55,15 +91,7 @@ def apply_glass_window_effect(window: QWidget, enable: bool) -> None:
     simply look darker than normal because the attribute is set but not composited.
     """
     window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, enable)
-    if enable:
-        window.setStyleSheet(
-            f"MainWindow {{ background: {_GLASS_WINDOW_BG};"
-            f" border: 1px solid {_GLASS_BORDER}; border-radius: 6px; }}"
-            "QScrollArea { background: transparent; border: none; }"
-            "QScrollArea > QWidget > QWidget { background: transparent; }"
-        )
-    else:
-        window.setStyleSheet("")
+    window.setStyleSheet(_GLASS_STYLESHEET if enable else "")
 
 
 def _dark_palette() -> QPalette:
