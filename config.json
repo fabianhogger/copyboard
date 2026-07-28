@@ -1,7 +1,6 @@
 {
   "retention": {
-    "max_items": 30,
-    "max_age_minutes": 200000
+    "max_items": 30
   },
   "hotkey": {
     "toggle_viewer_hotkey": "ctrl+shift+h"

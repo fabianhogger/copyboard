@@ -27,7 +27,10 @@ class ClippingHistory:
 
     def enforce_retention(self, now: datetime) -> list[Clipping]:
         """Drop clippings that are too old or beyond the count limit; return the removed ones."""
-        cutoff = now - self._policy.max_age
+        try:
+            cutoff = now - self._policy.max_age
+        except OverflowError:
+            cutoff = datetime.min  # max_age is timedelta.max — nothing ever expires by age
         removed = [clipping for clipping in self._clippings if clipping.created_at < cutoff]
         self._clippings = [
             clipping for clipping in self._clippings if clipping.created_at >= cutoff
