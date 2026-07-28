@@ -41,6 +41,7 @@ class ClippingWidget(QWidget):
         self._clipboard_payload = clipping.to_clipboard_payload()
         self._on_recopy = on_recopy
         self._on_delete = on_delete
+        self._actions_on_right_click = actions_on_right_click
         self._drag_start_position: QPoint | None = None
 
         row = QHBoxLayout(self)
@@ -63,6 +64,17 @@ class ClippingWidget(QWidget):
         ).manhattanLength() >= QApplication.startDragDistance()
         if moved_far_enough:
             self._start_drag()
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        # _start_drag clears _drag_start_position; if it is still set here the press never became
+        # a drag, so this is a plain click — copy in right-click mode.
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            and self._drag_start_position is not None
+            and self._actions_on_right_click
+        ):
+            self._drag_start_position = None
+            self._request_recopy()
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         menu = QMenu(self)
