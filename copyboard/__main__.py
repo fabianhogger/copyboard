@@ -61,7 +61,6 @@ def main() -> int:
 
     config_path = Path(DEFAULT_CONFIG_FILENAME)
     config = load_app_config_from_json(config_path)
-    theme_controller = ThemeController(app, config.theme)
 
     clock = SystemClock()
     classifier = ClippingClassifier(vault=TempDirVault(), clock=clock)
@@ -74,7 +73,10 @@ def main() -> int:
     source = QtClipboardSource(clipboard, echo_guard)
     source.set_new_content_listener(service.handle_new_clipboard_content)
 
-    window = MainWindow(service)
+    window = MainWindow(service, config.ui)
+    # ThemeController is created after the window so it can apply WA_TranslucentBackground
+    # before window.show(), which is required on some platforms (notably Windows).
+    theme_controller = ThemeController(app, config.theme, window)
     window.show()
 
     tray = TrayIcon(

@@ -1,7 +1,52 @@
 # Copyboard
 
-A small  tray app that shows a live view of your recent
-clipboard clippings so you can glance back and re-copy anything you copied earlier, not just the last item.
+A cross-platform system-tray app that keeps a live, scrollable history of everything you copy — text, URLs, paths, images, JSON, Markdown, shell commands — so you can glance back and re-copy anything, not just the last item.
+
+## Features
+
+**Automatic capture**  
+Every clipboard change is recorded in the background. The app runs silently in the system tray; there is nothing to configure before it starts working.
+
+**Smart content classification**  
+Each clipping is automatically classified so you can tell what you're looking at at a glance:
+
+| Kind | Detected when |
+|------|--------------|
+| URL | `http://`, `https://`, `ftp://`, `ftps://` with a valid host |
+| Path | Windows drive (`C:\`), UNC (`\\server\share`), POSIX absolute (`/foo`), or home-relative (`~/…`) |
+| JSON | Parses as a valid JSON object `{}` or array `[]` |
+| Markdown | Contains headings, fenced code blocks, blockquotes, inline links, bold text, or two or more list items |
+| Command | First word is a known CLI tool (`git`, `docker`, `kubectl`, `npm`, `uv`, `ssh`, `curl`, …) or line starts with `$`, `>`, `#`, `PS ` |
+| Image | Bitmap copied from any app; stored in a temp file and shown as a thumbnail |
+| Text | Everything else |
+
+**Viewer window**  
+A scrollable list (newest first) with a timestamp and preview for each item. Images render as 160 × 90 thumbnails. Each row has:
+- **Copy** — puts the item back on the system clipboard
+- **Delete** — removes it from history immediately
+- **Drag** — drag any item directly into another app (text, URLs, paths, or image files)
+
+**Global hotkey**  
+Press **Ctrl+Shift+H** (configurable) from any application to show or raise the viewer. Press again while the viewer is in the foreground to hide it.
+
+**System-tray icon**  
+Click the tray icon to toggle the viewer. Right-click for the menu:
+- Show / hide viewer
+- Toggle light / dark theme
+- Edit config… (opens `config.json` in your default editor)
+- Quit Copyboard
+
+**Live theme toggle**  
+Switch between dark, light, and system themes from the tray menu — no restart needed.
+
+**Retention policy**  
+Both limits apply together: the history keeps at most `max_items` clippings **and** drops anything older than `max_age_minutes`. Pruning runs every second in the background.
+
+**No echo duplicates**  
+When you re-copy a clipping, the resulting clipboard change is suppressed so it doesn't create a new duplicate entry.
+
+**Detaches from the terminal**  
+Launching `uv run copyboard` immediately returns your shell prompt; the app continues running in the background.
 
 ## Install & run
 
@@ -9,43 +54,52 @@ Requires [uv](https://docs.astral.sh/uv/) and Python 3.10+.
 
 ```
 uv sync            # create .venv and install dependencies
-uv run copyboard   # launch the tray app
+uv run copyboard   # launch the tray app (detaches from terminal automatically)
 ```
-
-The app lives in the **system tray**. Click the tray icon or press the global hotkey
-(**Ctrl+Shift+H** by default) to show/hide the viewer. In the viewer, **Copy** puts an item back on
-the clipboard and **Delete** removes it.
-**Edit config…**.
 
 ## Configuration
 
-Settings load from `config.json` at the repo root (missing/partial files fall back to defaults):
+Settings load from `config.json` at the repo root. Missing or partial files fall back to defaults.
 
 ```json
 {
-  "retention": { "max_items": 30, "max_age_minutes": 20 },
-  "hotkey": { "toggle_viewer_hotkey": "ctrl+shift+h" },
+  "retention": {
+    "max_items": 30,
+    "max_age_minutes": 20
+  },
+  "hotkey": {
+    "toggle_viewer_hotkey": "ctrl+shift+h"
+  },
   "theme": "dark"
 }
 ```
 
-Retention keeps at most `max_items` clippings **and** drops anything older than `max_age_minutes`.
-`theme` is `dark` (default), `light`, or `system` (follow the OS)
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `retention.max_items` | `30` | Maximum number of clippings to keep |
+| `retention.max_age_minutes` | `20` | Drop clippings older than this many minutes |
+| `hotkey.toggle_viewer_hotkey` | `ctrl+shift+h` | Global show/hide hotkey |
+| `theme` | `dark` | `dark`, `light`, or `system` (follow the OS) |
 
-Docs: [SPEC.md](SPEC.md) (scope) · [ARCHITECTURE.md](ARCHITECTURE.md) (design) ·
-[TASKS.md](TASKS.md) (progress) · [PLAN.md](PLAN.md) (phased plan).
+You can open the config file directly from the tray menu via **Edit config…**
+
+## Platform notes
+
+| Platform | Notes |
+|----------|-------|
+| Linux | The global hotkey requires **X11**. On native Wayland, the hotkey won't bind, but the tray icon still works. |
+| macOS | `pynput` needs **Accessibility permission** (System Settings → Privacy → Accessibility). Without it the hotkey is skipped, but the app runs normally. |
+| Windows | Works out of the box. |
+
+If the hotkey fails to bind, the app still runs — use the tray icon to open the viewer.
 
 ## Development
 
 ```
 uv run ruff check .     # lint
 uv run ruff format .    # format
-uv run mypy .           # type-check (src + tests, disallow untyped defs)
-uv run pytest           # tests
+uv run mypy .           # type-check (src + tests, disallow_untyped_defs)
+uv run pytest           # run the test suite
 ```
 
-## Platform notes
-
-The global hotkey uses `pynput`, which needs **X11** on Linux (not native Wayland) and
-**Accessibility permission** on macOS. If the hotkey can't bind, the app still runs — use the tray
-icon to open the viewer.
+Docs: [SPEC.md](SPEC.md) (scope) · [ARCHITECTURE.md](ARCHITECTURE.md) (design) · [TASKS.md](TASKS.md) (progress) · [PLAN.md](PLAN.md) (phased plan)

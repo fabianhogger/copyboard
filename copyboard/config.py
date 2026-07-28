@@ -11,7 +11,7 @@ from datetime import timedelta
 from enum import Enum
 
 _DEFAULT_MAX_ITEMS = 30
-_DEFAULT_MAX_AGE = timedelta(minutes=20)
+_DEFAULT_MAX_AGE = timedelta.max  # no age limit unless the user sets max_age_minutes
 _DEFAULT_TOGGLE_HOTKEY = "ctrl+shift+h"
 
 
@@ -21,6 +21,7 @@ class Theme(Enum):
     DARK = "dark"
     LIGHT = "light"
     SYSTEM = "system"
+    GLASS = "glass"
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,9 +40,17 @@ class HotkeyConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class UIConfig:
+    """UI behaviour options."""
+
+    actions_on_right_click: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class AppConfig:
     """Top-level configuration bundle wired in at the composition root."""
 
     retention: RetentionPolicy = field(default_factory=RetentionPolicy)
     hotkey: HotkeyConfig = field(default_factory=HotkeyConfig)
-    theme: Theme = Theme.DARK
+    ui: UIConfig = field(default_factory=UIConfig)
+    theme: Theme = Theme.GLASS
