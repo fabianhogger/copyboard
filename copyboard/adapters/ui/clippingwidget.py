@@ -22,6 +22,8 @@ from copyboard.domain.clipping import Clipping, ImageClipping
 
 _THUMBNAIL_WIDTH = 160
 _THUMBNAIL_HEIGHT = 90
+_WIDE_THUMBNAIL_WIDTH = 340
+_WIDE_THUMBNAIL_HEIGHT = 200
 
 
 class ClippingWidget(QWidget):
@@ -33,6 +35,7 @@ class ClippingWidget(QWidget):
         on_recopy: Callable[[str], None],
         on_delete: Callable[[str], None],
         actions_on_right_click: bool = True,
+        wide: bool = False,
     ) -> None:
         super().__init__()
         # Required for Qt to paint a stylesheet `background` on a plain QWidget subclass.
@@ -42,6 +45,7 @@ class ClippingWidget(QWidget):
         self._on_recopy = on_recopy
         self._on_delete = on_delete
         self._actions_on_right_click = actions_on_right_click
+        self._wide = wide
         self._drag_start_position: QPoint | None = None
 
         row = QHBoxLayout(self)
@@ -109,10 +113,12 @@ class ClippingWidget(QWidget):
         if pixmap.isNull():
             label.setText(clipping.build_preview_text())
             return label
+        tw = _WIDE_THUMBNAIL_WIDTH if self._wide else _THUMBNAIL_WIDTH
+        th = _WIDE_THUMBNAIL_HEIGHT if self._wide else _THUMBNAIL_HEIGHT
         label.setPixmap(
             pixmap.scaled(
-                _THUMBNAIL_WIDTH,
-                _THUMBNAIL_HEIGHT,
+                tw,
+                th,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
