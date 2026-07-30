@@ -28,6 +28,8 @@ a live view of your recent clippings, so you can glance back and re-copy any of 
 2. **Live view** — a window listing recent clippings, newest first, each showing a preview
    (text snippet, URL, path, or image thumbnail) and its capture time.
 3. **Re-copy** — clicking a clipping puts it back on the system clipboard.
+   The clipping currently represented by the system clipboard is marked with a solid outline in the
+   viewer.
 4. **Delete** — a clipping can be removed from the view.
 5. **Retention** — the view keeps only recent clippings, bounded by **both**:
    - a maximum **count** (default **30**), and

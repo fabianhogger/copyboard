@@ -49,6 +49,12 @@ class StackPasteModeObserver(Protocol):
     def on_stack_paste_mode_changed(self, enabled: bool) -> None: ...
 
 
+class CurrentClipboardObserver(Protocol):
+    """Something that reacts when a different history item occupies the clipboard."""
+
+    def on_current_clipboard_clipping_changed(self, clipping_id: str | None) -> None: ...
+
+
 class ObserverRegistry:
     """Holds observers and fans a single event out to all of them."""
 

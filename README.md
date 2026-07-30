@@ -26,6 +26,9 @@ A scrollable list (newest first) with a timestamp and preview for each item. Ima
 - **Delete** — removes it from history immediately
 - **Drag** — drag any item directly into another app (text, URLs, paths, or image files)
 
+The item currently on the system clipboard has a simple solid outline. The outline follows new
+copies, row re-copy actions, and stack-paste advancement, and disappears when the clipboard is clear.
+
 **Global hotkey**  
 Press **Ctrl+Shift+H** (configurable) from any application to show or raise the viewer. Press again while the viewer is in the foreground to hide it.
 

@@ -30,9 +30,32 @@ def _build_populated_window() -> tuple[MainWindow, FakeClipboardSink]:
     return MainWindow(service, prune_interval_ms=100_000), sink
 
 
+def _find_current_clipboard_rows_in_layout(window: MainWindow) -> list[ClippingWidget]:
+    current_rows: list[ClippingWidget] = []
+    for index in range(window._list_layout.count()):
+        item = window._list_layout.itemAt(index)
+        if item is None:
+            continue
+        widget = item.widget()
+        if isinstance(widget, ClippingWidget) and widget.property("currentClipboardItem") is True:
+            current_rows.append(widget)
+    return current_rows
+
+
 def test_window_builds_one_row_per_clipping(qt_app: QApplication) -> None:
     window, _ = _build_populated_window()
     assert len(window.findChildren(ClippingWidget)) == 2
+
+
+def test_current_clipboard_row_has_a_single_solid_outline(qt_app: QApplication) -> None:
+    window, _ = _build_populated_window()
+    current_rows = _find_current_clipboard_rows_in_layout(window)
+
+    assert len(current_rows) == 1
+    assert current_rows[0].objectName() == "currentClipboardClipping"
+    assert "#currentClipboardClipping" in current_rows[0].styleSheet()
+    assert "2px solid" in current_rows[0].styleSheet()
+    assert "gradient" not in current_rows[0].styleSheet()
 
 
 def test_copy_button_recopies_through_the_service(qt_app: QApplication) -> None:
@@ -42,6 +65,20 @@ def test_copy_button_recopies_through_the_service(qt_app: QApplication) -> None:
     copy_buttons[0].click()
 
     assert len(sink.copied_clippings) == 1
+
+
+def test_copying_an_older_row_moves_the_current_clipboard_outline(qt_app: QApplication) -> None:
+    window, _ = _build_populated_window()
+    copy_buttons = [
+        button for button in window.findChildren(QPushButton) if button.text() == "Copy"
+    ]
+
+    copy_buttons[1].click()
+    qt_app.processEvents()
+
+    current_rows = _find_current_clipboard_rows_in_layout(window)
+    assert len(current_rows) == 1
+    assert any(label.text() == "hello world" for label in current_rows[0].findChildren(QLabel))
 
 
 def test_stack_paste_button_toggles_mode_and_shows_current_state(qt_app: QApplication) -> None:

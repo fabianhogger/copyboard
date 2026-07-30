@@ -65,3 +65,13 @@ class RecordingStackPasteModeObserver:
 
     def on_stack_paste_mode_changed(self, enabled: bool) -> None:
         self.enabled_states.append(enabled)
+
+
+class RecordingCurrentClipboardObserver:
+    """Records which history item the service considers current on the clipboard."""
+
+    def __init__(self) -> None:
+        self.clipping_ids: list[str | None] = []
+
+    def on_current_clipboard_clipping_changed(self, clipping_id: str | None) -> None:
+        self.clipping_ids.append(clipping_id)

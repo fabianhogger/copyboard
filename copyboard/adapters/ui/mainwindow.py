@@ -24,6 +24,7 @@ class MainWindow(QWidget):
 
     _history_changed = Signal()
     _stack_paste_mode_changed = Signal(bool)
+    _current_clipboard_clipping_changed = Signal()
 
     def __init__(
         self,
@@ -53,11 +54,15 @@ class MainWindow(QWidget):
 
         service.register_observer(self)
         service.register_stack_paste_mode_observer(self)
+        service.register_current_clipboard_observer(self)
         self._history_changed.connect(
             self._refresh_clipping_list, Qt.ConnectionType.QueuedConnection
         )
         self._stack_paste_mode_changed.connect(
             self._synchronize_stack_paste_button, Qt.ConnectionType.QueuedConnection
+        )
+        self._current_clipboard_clipping_changed.connect(
+            self._refresh_clipping_list, Qt.ConnectionType.QueuedConnection
         )
 
         self._prune_timer = QTimer(self)
@@ -72,6 +77,9 @@ class MainWindow(QWidget):
 
     def on_stack_paste_mode_changed(self, enabled: bool) -> None:
         self._stack_paste_mode_changed.emit(enabled)
+
+    def on_current_clipboard_clipping_changed(self, clipping_id: str | None) -> None:
+        self._current_clipboard_clipping_changed.emit()
 
     def toggle_visibility(self) -> None:
         """Hide only when already frontmost; otherwise surface the window to the front.
@@ -95,6 +103,7 @@ class MainWindow(QWidget):
 
     def _refresh_clipping_list(self) -> None:
         self._clear_list_layout()
+        current_clipping_id = self._service.get_current_clipboard_clipping_id()
         for clipping in self._service.list_clippings_newest_first():
             self._list_layout.addWidget(
                 ClippingWidget(
@@ -102,6 +111,7 @@ class MainWindow(QWidget):
                     self._service.recopy_clipping_by_id,
                     self._service.delete_clipping_by_id,
                     actions_on_right_click=self._ui_config.actions_on_right_click,
+                    is_current_clipboard_item=clipping.id == current_clipping_id,
                 )
             )
         self._list_layout.addStretch(1)

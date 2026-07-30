@@ -14,6 +14,7 @@ from tests.fakes import (
     FakeClipboardSink,
     FakeClock,
     FakeVault,
+    RecordingCurrentClipboardObserver,
     RecordingHistoryObserver,
     RecordingStackPasteModeObserver,
 )
@@ -193,3 +194,19 @@ def test_stack_paste_mode_observers_receive_distinct_state_changes() -> None:
     service.set_stack_paste_mode_enabled(False)
 
     assert observer.enabled_states == [True, False]
+
+
+def test_current_clipboard_observer_tracks_capture_recopy_and_clear() -> None:
+    service, _, _, _ = _build_service()
+    observer = RecordingCurrentClipboardObserver()
+    service.register_current_clipboard_observer(observer)
+    service.handle_new_clipboard_content(RawClipboardData(text="first"))
+    first = service.list_clippings_newest_first()[0]
+    service.handle_new_clipboard_content(RawClipboardData(text="second"))
+    second = service.list_clippings_newest_first()[0]
+
+    service.recopy_clipping_by_id(first.id)
+    service.handle_new_clipboard_content(RawClipboardData())
+
+    assert observer.clipping_ids == [first.id, None, second.id, first.id, None]
+    assert service.get_current_clipboard_clipping_id() is None

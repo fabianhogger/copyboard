@@ -30,6 +30,9 @@ from copyboard.domain.clipping import Clipping, ImageClipping
 
 _THUMBNAIL_WIDTH = 160
 _THUMBNAIL_HEIGHT = 90
+_CURRENT_CLIPBOARD_BORDER_STYLESHEET = (
+    "#currentClipboardClipping { border: 2px solid palette(highlight); }"
+)
 
 
 class ClippingWidget(QWidget):
@@ -41,10 +44,16 @@ class ClippingWidget(QWidget):
         on_recopy: Callable[[str], None],
         on_delete: Callable[[str], None],
         actions_on_right_click: bool = True,
+        is_current_clipboard_item: bool = False,
     ) -> None:
         super().__init__()
         # Required for Qt to paint a stylesheet `background` on a plain QWidget subclass.
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setProperty("currentClipboardItem", is_current_clipboard_item)
+        if is_current_clipboard_item:
+            self.setObjectName("currentClipboardClipping")
+            self.setStyleSheet(_CURRENT_CLIPBOARD_BORDER_STYLESHEET)
+            self.setToolTip("Currently on the system clipboard")
         self._clipping_id = clipping.id
         self._clipboard_payload = clipping.to_clipboard_payload()
         self._on_recopy = on_recopy

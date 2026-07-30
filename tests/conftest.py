@@ -17,3 +17,7 @@ def qt_app() -> Iterator[QApplication]:
     existing = QApplication.instance()
     app = existing if isinstance(existing, QApplication) else QApplication([])
     yield app
+    for widget in app.topLevelWidgets():
+        widget.close()
+        widget.deleteLater()
+    app.processEvents()

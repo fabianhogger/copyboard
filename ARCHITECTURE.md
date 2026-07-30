@@ -86,7 +86,9 @@ copyboard/
 ## Stack paste flow
 
 `CopyboardService` owns the off-by-default stack state and the ID of the exact clipping prepared on
-the clipboard. It notifies mode observers so the viewer button and tray action stay synchronized.
+the clipboard. The same current-clipping ID drives the viewer's solid clipboard-item outline during
+normal capture and re-copy operations. It notifies UI observers when either state changes, keeping
+the row outline, viewer button, and tray action synchronized.
 Enabling either control copies the newest clipping. `PynputPasteObserver` watches the
 native Ctrl+V shortcut on Windows/Linux or Cmd+V on macOS without suppressing it. On chord release,
 the composition root queues a GUI-thread call that removes the prepared clipping, notifies history
