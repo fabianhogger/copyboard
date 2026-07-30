@@ -42,6 +42,15 @@ class _HotkeyToggleBridge(QObject):
     triggered = Signal()
 
 
+def _handle_lifo_paste(service: CopyboardService) -> None:
+    """Pop the top clipping onto the clipboard.
+
+    The original Ctrl+V keystroke that triggered this is still dispatched by the OS, so no
+    synthetic paste is needed — the focused app will paste the swapped clipboard content.
+    """
+    service.pop_and_recopy_top_clipping()
+
+
 def _open_config_in_editor(config_path: Path, config: AppConfig) -> None:
     """Open ``config.json`` in the OS default editor, seeding it with defaults if absent."""
     if not config_path.is_file():
@@ -93,10 +102,23 @@ def main() -> int:
     hotkey = PynputHotkeyBinder(config.hotkey.toggle_viewer_hotkey, lambda: bridge.triggered.emit())
     hotkey.start()
 
+    paste_hotkey: PynputHotkeyBinder | None = None
+    if config.ui.lifo_paste_enabled:
+        paste_bridge = _HotkeyToggleBridge()
+        paste_bridge.triggered.connect(
+            lambda: _handle_lifo_paste(service), Qt.ConnectionType.QueuedConnection
+        )
+        paste_hotkey = PynputHotkeyBinder(
+            config.hotkey.pop_and_paste_hotkey, lambda: paste_bridge.triggered.emit()
+        )
+        paste_hotkey.start()
+
     try:
         return app.exec()
     finally:
         hotkey.stop()
+        if paste_hotkey is not None:
+            paste_hotkey.stop()
 
 
 if __name__ == "__main__":

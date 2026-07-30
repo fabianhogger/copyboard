@@ -3,9 +3,11 @@
     "max_items": 30
   },
   "hotkey": {
-    "toggle_viewer_hotkey": "ctrl+shift+h"
+    "toggle_viewer_hotkey": "ctrl+shift+h",
+    "pop_and_paste_hotkey": "ctrl+v"
   },
   "ui": {
-    "actions_on_right_click": true
+    "actions_on_right_click": true,
+    "lifo_paste_enabled": true
   }
 }

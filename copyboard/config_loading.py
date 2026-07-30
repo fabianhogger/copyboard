@@ -27,8 +27,14 @@ def write_default_config_file(config_path: Path, config: AppConfig) -> None:
                 else config.retention.max_age.total_seconds() / 60
             ),
         },
-        "hotkey": {"toggle_viewer_hotkey": config.hotkey.toggle_viewer_hotkey},
-        "ui": {"actions_on_right_click": config.ui.actions_on_right_click},
+        "hotkey": {
+            "toggle_viewer_hotkey": config.hotkey.toggle_viewer_hotkey,
+            "pop_and_paste_hotkey": config.hotkey.pop_and_paste_hotkey,
+        },
+        "ui": {
+            "actions_on_right_click": config.ui.actions_on_right_click,
+            "lifo_paste_enabled": config.ui.lifo_paste_enabled,
+        },
         "theme": config.theme.value,
     }
     config_path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
@@ -65,7 +71,8 @@ def _build_ui_config(section: Any, default: UIConfig) -> UIConfig:
     if not isinstance(section, dict):
         return default
     actions_on_right_click = bool(section.get("actions_on_right_click", default.actions_on_right_click))
-    return UIConfig(actions_on_right_click=actions_on_right_click)
+    lifo_paste_enabled = bool(section.get("lifo_paste_enabled", default.lifo_paste_enabled))
+    return UIConfig(actions_on_right_click=actions_on_right_click, lifo_paste_enabled=lifo_paste_enabled)
 
 
 def _build_theme(value: Any, default: Theme) -> Theme:
@@ -90,4 +97,5 @@ def _build_hotkey_config(section: Any, default: HotkeyConfig) -> HotkeyConfig:
     if not isinstance(section, dict):
         return default
     toggle_hotkey = str(section.get("toggle_viewer_hotkey", default.toggle_viewer_hotkey))
-    return HotkeyConfig(toggle_viewer_hotkey=toggle_hotkey)
+    pop_hotkey = str(section.get("pop_and_paste_hotkey", default.pop_and_paste_hotkey))
+    return HotkeyConfig(toggle_viewer_hotkey=toggle_hotkey, pop_and_paste_hotkey=pop_hotkey)
