@@ -15,7 +15,15 @@ from collections.abc import Callable
 
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QPixmap
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QMenu, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QHBoxLayout,
+    QLabel,
+    QMenu,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from copyboard.adapters.qt.clippingdragdata import build_drag_mime_data
 from copyboard.domain.clipping import Clipping, ImageClipping
