@@ -1,9 +1,9 @@
 """Composition root — the only place concrete adapters are wired into the service.
 
 Builds the Qt application, the pure core (classifier, history, service) and every adapter
-(clock, vault, clipboard source/sink, viewer, tray, global hotkey), connects them, and runs the
-event loop. The global hotkey fires on a background thread, so its callback is bounced onto the GUI
-thread through a queued Qt signal.
+(clock, vault, clipboard source/sink, viewer, tray, global keyboard observers), connects them, and
+runs the event loop. Keyboard callbacks fire on background threads, so they are bounced onto the GUI
+thread through queued Qt signals.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from PySide6.QtWidgets import QApplication
 from copyboard.adapters.clipboardechoguard import ClipboardEchoGuard
 from copyboard.adapters.processdetach import relaunch_detached, should_relaunch_detached
 from copyboard.adapters.pynputhotkeybinder import PynputHotkeyBinder
+from copyboard.adapters.pynputpasteobserver import PynputPasteObserver
 from copyboard.adapters.qt.qtclipboard import QtClipboardSink, QtClipboardSource
 from copyboard.adapters.systemclock import SystemClock
 from copyboard.adapters.tempdirvault import TempDirVault
@@ -36,10 +37,11 @@ from copyboard.domain.clippingclassifier import ClippingClassifier
 from copyboard.domain.clippinghistory import ClippingHistory
 
 
-class _HotkeyToggleBridge(QObject):
-    """Marshals the background-thread hotkey callback onto the Qt GUI thread."""
+class _GlobalInputBridge(QObject):
+    """Marshals background-thread keyboard callbacks onto the Qt GUI thread."""
 
-    triggered = Signal()
+    viewer_toggle_requested = Signal()
+    paste_shortcut_released = Signal()
 
 
 def _open_config_in_editor(config_path: Path, config: AppConfig) -> None:
@@ -82,21 +84,35 @@ def main() -> int:
     tray = TrayIcon(
         create_default_tray_icon(),
         window.toggle_visibility,
+        service.set_stack_paste_mode_enabled,
         theme_controller.toggle,
         lambda: _open_config_in_editor(config_path, config),
         app.quit,
     )
+    service.register_stack_paste_mode_observer(tray)
     tray.show()
 
-    bridge = _HotkeyToggleBridge()
-    bridge.triggered.connect(window.toggle_visibility, Qt.ConnectionType.QueuedConnection)
-    hotkey = PynputHotkeyBinder(config.hotkey.toggle_viewer_hotkey, lambda: bridge.triggered.emit())
-    hotkey.start()
+    bridge = _GlobalInputBridge()
+    bridge.viewer_toggle_requested.connect(
+        window.toggle_visibility, Qt.ConnectionType.QueuedConnection
+    )
+    bridge.paste_shortcut_released.connect(
+        service.consume_prepared_clipping_after_paste,
+        Qt.ConnectionType.QueuedConnection,
+    )
+    viewer_hotkey = PynputHotkeyBinder(
+        config.hotkey.toggle_viewer_hotkey,
+        lambda: bridge.viewer_toggle_requested.emit(),
+    )
+    paste_observer = PynputPasteObserver(lambda: bridge.paste_shortcut_released.emit())
+    viewer_hotkey.start()
+    paste_observer.start()
 
     try:
         return app.exec()
     finally:
-        hotkey.stop()
+        paste_observer.stop()
+        viewer_hotkey.stop()
 
 
 if __name__ == "__main__":

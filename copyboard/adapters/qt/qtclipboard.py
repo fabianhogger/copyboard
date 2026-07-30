@@ -1,7 +1,8 @@
 """Qt-backed clipboard adapters: capture changes and write clippings back.
 
 ``QtClipboardSource`` implements the ``ClipboardSource`` port and drives the service on every
-clipboard change; ``QtClipboardSink`` implements the ``ClipboardSink`` port. Both share a
+clipboard change, including an external clear; ``QtClipboardSink`` implements the ``ClipboardSink``
+port. Both share a
 :class:`ClipboardEchoGuard` so a re-copy does not get re-captured as a new clipping.
 """
 
@@ -57,8 +58,6 @@ class QtClipboardSource:
 
     def _handle_clipboard_data_changed(self) -> None:
         content = self.read_current_content()
-        if content.is_empty():
-            return
         if self._echo_guard.consume_if_armed():
             self._last_content = content
             return
@@ -98,3 +97,7 @@ class QtClipboardSink:
         elif payload.text is not None:
             self._echo_guard.arm()
             self._clipboard.setText(payload.text)
+
+    def clear_system_clipboard(self) -> None:
+        self._echo_guard.arm()
+        self._clipboard.clear()

@@ -64,7 +64,9 @@ def _build_app_config_from_document(document: dict[str, Any]) -> AppConfig:
 def _build_ui_config(section: Any, default: UIConfig) -> UIConfig:
     if not isinstance(section, dict):
         return default
-    actions_on_right_click = bool(section.get("actions_on_right_click", default.actions_on_right_click))
+    actions_on_right_click = bool(
+        section.get("actions_on_right_click", default.actions_on_right_click)
+    )
     return UIConfig(actions_on_right_click=actions_on_right_click)
 
 

@@ -44,6 +44,26 @@ def test_copy_button_recopies_through_the_service(qt_app: QApplication) -> None:
     assert len(sink.copied_clippings) == 1
 
 
+def test_stack_paste_button_toggles_mode_and_shows_current_state(qt_app: QApplication) -> None:
+    window, sink = _build_populated_window()
+    stack_paste_button = window.findChild(QPushButton, "stackPasteToggleButton")
+    assert stack_paste_button is not None
+    assert stack_paste_button.text() == "Stack paste: Off"
+
+    stack_paste_button.click()
+    qt_app.processEvents()
+
+    assert stack_paste_button.isChecked()
+    assert stack_paste_button.text() == "Stack paste: On"
+    assert len(sink.copied_clippings) == 1
+
+    stack_paste_button.click()
+    qt_app.processEvents()
+
+    assert not stack_paste_button.isChecked()
+    assert stack_paste_button.text() == "Stack paste: Off"
+
+
 def test_toggle_from_hidden_brings_window_to_front(qt_app: QApplication) -> None:
     window, _ = _build_populated_window()
     assert not window.isVisible()
