@@ -51,6 +51,7 @@ def test_toggle_from_hidden_brings_window_to_front(qt_app: QApplication) -> None
     window.toggle_visibility()
 
     assert window.isVisible()
+    window.hide()  # don't leave a visible top-level window alive into teardown
 
 
 def test_bring_to_front_shows_a_hidden_window(qt_app: QApplication) -> None:
@@ -60,6 +61,7 @@ def test_bring_to_front_shows_a_hidden_window(qt_app: QApplication) -> None:
     window.bring_to_front()
 
     assert window.isVisible()
+    window.hide()  # don't leave a visible top-level window alive into teardown
 
 
 def test_rows_do_not_label_the_clipping_kind(qt_app: QApplication) -> None:
