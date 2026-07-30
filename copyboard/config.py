@@ -13,6 +13,7 @@ from enum import Enum
 _DEFAULT_MAX_ITEMS = 30
 _DEFAULT_MAX_AGE = timedelta.max  # no age limit unless the user sets max_age_minutes
 _DEFAULT_TOGGLE_HOTKEY = "ctrl+shift+h"
+_DEFAULT_POP_AND_PASTE_HOTKEY = "ctrl+v"
 
 
 class Theme(Enum):
@@ -34,9 +35,10 @@ class RetentionPolicy:
 
 @dataclass(frozen=True, slots=True)
 class HotkeyConfig:
-    """The global hotkey that shows/hides the viewer window."""
+    """The global hotkeys that control viewer and clipboard-stack behaviour."""
 
     toggle_viewer_hotkey: str = _DEFAULT_TOGGLE_HOTKEY
+    pop_and_paste_hotkey: str = _DEFAULT_POP_AND_PASTE_HOTKEY
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,6 +46,7 @@ class UIConfig:
     """UI behaviour options."""
 
     actions_on_right_click: bool = False
+    lifo_paste_enabled: bool = True
 
 
 @dataclass(frozen=True, slots=True)

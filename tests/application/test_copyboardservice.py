@@ -67,6 +67,39 @@ def test_delete_removes_the_clipping_and_notifies() -> None:
     assert any(isinstance(event, ClippingRemoved) for event in observer.events)
 
 
+def test_pop_and_recopy_returns_false_when_history_is_empty() -> None:
+    service, _, _, _ = _build_service()
+
+    result = service.pop_and_recopy_top_clipping()
+
+    assert result is False
+
+
+def test_pop_and_recopy_writes_top_clipping_to_sink_and_removes_it() -> None:
+    service, sink, _, _ = _build_service()
+    service.handle_new_clipboard_content(RawClipboardData(text="first"))
+    service.handle_new_clipboard_content(RawClipboardData(text="second"))
+
+    result = service.pop_and_recopy_top_clipping()
+
+    assert result is True
+    assert len(sink.copied_clippings) == 1
+    assert sink.copied_clippings[0].build_preview_text() == "second"
+    remaining = [c.build_preview_text() for c in service.list_clippings_newest_first()]
+    assert remaining == ["first"]
+
+
+def test_pop_and_recopy_notifies_observers_with_clipping_removed() -> None:
+    service, _, observer, _ = _build_service()
+    service.handle_new_clipboard_content(RawClipboardData(text="hello"))
+    observer.events.clear()
+
+    service.pop_and_recopy_top_clipping()
+
+    assert len(observer.events) == 1
+    assert isinstance(observer.events[0], ClippingRemoved)
+
+
 def test_expired_clippings_are_pruned_when_new_content_arrives() -> None:
     service, _, observer, clock = _build_service(
         RetentionPolicy(max_items=100, max_age=timedelta(minutes=20))
