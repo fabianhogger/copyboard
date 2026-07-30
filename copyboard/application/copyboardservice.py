@@ -122,9 +122,7 @@ class CopyboardService:
     def list_clippings_newest_first(self) -> list[Clipping]:
         return self._history.list_clippings_newest_first()
 
-    def _prepare_newest_clipping_for_stack_paste(
-        self, *, clear_clipboard_if_empty: bool
-    ) -> None:
+    def _prepare_newest_clipping_for_stack_paste(self, *, clear_clipboard_if_empty: bool) -> None:
         if not self._stack_paste_mode_enabled:
             return
         clippings = self._history.list_clippings_newest_first()
