@@ -19,8 +19,8 @@ def test_dark_palette_uses_a_dark_window_colour(qt_app: QApplication) -> None:
     assert palette.color(QPalette.ColorRole.Window).lightness() < 128
 
 
-def test_translucent_theme_uses_flat_colours_without_gradients() -> None:
-    assert "qlineargradient" not in _GLASS_STYLESHEET
+def test_translucent_theme_uses_a_gradient_window_glint() -> None:
+    assert "qlineargradient" in _GLASS_STYLESHEET
     assert "background-color" in _GLASS_STYLESHEET
 
 

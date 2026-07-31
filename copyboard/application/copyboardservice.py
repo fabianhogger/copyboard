@@ -133,20 +133,6 @@ class CopyboardService:
         self._observers.notify_all(ClippingRemoved(top))
         return True
 
-    def pop_and_recopy_top_clipping(self) -> bool:
-        """Copy the newest clipping to the system clipboard and remove it from history.
-
-        Returns True if there was an item to pop, False if the history was empty.
-        """
-        clippings = self._history.list_clippings_newest_first()
-        if not clippings:
-            return False
-        top = clippings[0]
-        self._sink.copy_clipping_to_system_clipboard(top)
-        self._history.remove_clipping_by_id(top.id)
-        self._observers.notify_all(ClippingRemoved(top))
-        return True
-
     def list_clippings_newest_first(self) -> list[Clipping]:
         return self._history.list_clippings_newest_first()
 

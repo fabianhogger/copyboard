@@ -33,6 +33,13 @@ _THUMBNAIL_HEIGHT = 90
 _WIDE_THUMBNAIL_WIDTH = 340
 _WIDE_THUMBNAIL_HEIGHT = 200
 
+_CURRENT_CLIPBOARD_BORDER_STYLESHEET = (
+    "#currentClipboardClipping {"
+    "  border: 2px solid rgba(90, 150, 240, 255);"
+    "  border-radius: 3px;"
+    "}"
+)
+
 
 class ClippingWidget(QWidget):
     """Renders one clipping and forwards Copy/Delete to the given callbacks by clipping id."""
@@ -44,6 +51,7 @@ class ClippingWidget(QWidget):
         on_delete: Callable[[str], None],
         actions_on_right_click: bool = True,
         wide: bool = False,
+        is_current_clipboard_item: bool = False,
     ) -> None:
         super().__init__()
         # Required for Qt to paint a stylesheet `background` on a plain QWidget subclass.

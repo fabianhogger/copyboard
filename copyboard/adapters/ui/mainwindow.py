@@ -9,7 +9,7 @@ clippings, which drives time-based retention even when nothing new is copied.
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, QTimer, Signal
-from PySide6.QtWidgets import QGridLayout, QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QGridLayout, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from copyboard.adapters.ui.clippingwidget import ClippingWidget
 from copyboard.application.copyboardservice import CopyboardService
@@ -105,8 +105,13 @@ class MainWindow(QWidget):
         self.raise_()
         self.activateWindow()
 
+    def _synchronize_stack_paste_button(self, enabled: bool) -> None:
+        self._stack_paste_button.setChecked(enabled)
+        self._stack_paste_button.setText(f"Stack paste: {'On' if enabled else 'Off'}")
+
     def _refresh_clipping_list(self) -> None:
         self._clear_list_layout()
+        current_clipboard_id = self._service.get_current_clipboard_clipping_id()
         row, col = 0, 0
         for clipping in self._service.list_clippings_newest_first():
             wide = isinstance(clipping, ImageClipping)
@@ -116,6 +121,7 @@ class MainWindow(QWidget):
                 self._service.delete_clipping_by_id,
                 actions_on_right_click=self._ui_config.actions_on_right_click,
                 wide=wide,
+                is_current_clipboard_item=clipping.id == current_clipboard_id,
             )
             if wide:
                 if col == 1:  # flush the half-filled row before spanning

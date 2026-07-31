@@ -2,8 +2,8 @@
 
 Uses the Fusion style plus an explicit :class:`QPalette` so the look is identical on every platform
 (Windows, Linux, macOS). ``Theme.SYSTEM`` leaves Qt's native palette untouched. ``Theme.GLASS``
-uses uniform translucent fills without gradients. A :class:`ThemeController` keeps the current
-choice so the tray can flip it live.
+draws a translucent window with a subtle top-lit gradient glint over frosted fills. A
+:class:`ThemeController` keeps the current choice so the tray can flip it live.
 """
 
 from __future__ import annotations
