@@ -75,7 +75,7 @@ class TrayIcon:
         self._stack_paste_action.triggered.connect(
             lambda: on_stack_paste_mode_changed(self._stack_paste_action.isChecked())
         )
-        menu.addAction("Toggle light / dark").triggered.connect(lambda: on_toggle_theme())
+        menu.addAction("Cycle theme").triggered.connect(lambda: on_toggle_theme())
         menu.addAction("Edit config…").triggered.connect(lambda: on_edit_config())
         menu.addSeparator()
         menu.addAction("Quit Copyboard").triggered.connect(lambda: on_quit())

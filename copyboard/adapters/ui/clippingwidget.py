@@ -34,10 +34,7 @@ _WIDE_THUMBNAIL_WIDTH = 340
 _WIDE_THUMBNAIL_HEIGHT = 200
 
 _CURRENT_CLIPBOARD_BORDER_STYLESHEET = (
-    "#currentClipboardClipping {"
-    "  border: 2px solid rgba(90, 150, 240, 255);"
-    "  border-radius: 3px;"
-    "}"
+    "#currentClipboardClipping {  border: 2px solid rgba(90, 150, 240, 255);  border-radius: 3px;}"
 )
 
 

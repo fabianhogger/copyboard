@@ -38,6 +38,9 @@ class MainWindow(QWidget):
         self._ui_config = ui_config or UIConfig()
         self.setWindowTitle("Copyboard")
         self.resize(500, 620)
+        # Required for Qt to paint the glass theme's stylesheet `background`/`border` on this plain
+        # QWidget subclass; without it the translucent gradient frame is never drawn.
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         outer_layout = QVBoxLayout(self)
         self._stack_paste_button = QPushButton()

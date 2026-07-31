@@ -1,4 +1,5 @@
 {
+  "theme": "glass",
   "retention": {
     "max_items": 30
   },
