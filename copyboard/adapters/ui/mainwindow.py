@@ -130,11 +130,6 @@ class MainWindow(QWidget):
                     col = 0
                     row += 1
 
-    def _synchronize_stack_paste_button(self, enabled: bool) -> None:
-        self._stack_paste_button.setChecked(enabled)
-        state_text = "On" if enabled else "Off"
-        self._stack_paste_button.setText(f"Stack paste: {state_text}")
-
     def _clear_list_layout(self) -> None:
         while self._list_layout.count():
             item = self._list_layout.takeAt(0)
