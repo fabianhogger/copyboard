@@ -1,9 +1,8 @@
-"""Apply a light/dark/glass colour theme to the Qt application.
+"""Apply flat light, dark, and translucent colour themes to the Qt application.
 
 Uses the Fusion style plus an explicit :class:`QPalette` so the look is identical on every platform
 (Windows, Linux, macOS). ``Theme.SYSTEM`` leaves Qt's native palette untouched. ``Theme.GLASS``
-additionally sets ``WA_TranslucentBackground`` on the viewer window and applies an RGBA stylesheet
-so the desktop shows through the window background. A :class:`ThemeController` keeps the current
+uses uniform translucent fills without gradients. A :class:`ThemeController` keeps the current
 choice so the tray can flip it live.
 """
 
@@ -17,14 +16,6 @@ from copyboard.config import Theme
 
 _FUSION_STYLE = "Fusion"
 
-# Glass theme stylesheet applied to the viewer window.
-#
-# The illusion rests on three layers:
-#   1. Window gradient — a blue-white glint at the very top rim that transitions into a frosted-
-#      white body, making the window visible even when the list is empty.
-#   2. Directional borders — bright on top/left (light source), dim on right/bottom (shadow side).
-#   3. Row tiles — each ClippingWidget uses a more opaque frosted gradient so it floats above the
-#      window body with its own bright top-edge highlight.
 _GLASS_STYLESHEET = (
     "MainWindow {"
     "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
@@ -41,19 +32,19 @@ _GLASS_STYLESHEET = (
     "}"
     "QScrollArea { background: transparent; border: none; }"
     "QScrollArea > QWidget > QWidget { background: transparent; }"
-    # Row tiles — more opaque than the window body so they visibly float above it.
     "ClippingWidget {"
-    "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
-    "    stop:0.0 rgba(255, 255, 255, 42),"
-    "    stop:0.4 rgba(255, 255, 255, 22),"
-    "    stop:1.0 rgba(255, 255, 255, 10));"
-    "  border-top:    1px solid rgba(255, 255, 255, 70);"  # top highlight — catches light
-    "  border-left:   1px solid rgba(255, 255, 255, 35);"
-    "  border-right:  1px solid rgba(0,   0,   0,   20);"
-    "  border-bottom: 1px solid rgba(0,   0,   0,   28);"
-    "  border-radius: 4px;"
+    "  background-color: rgba(43, 43, 43, 245);"
+    "  border: 1px solid rgba(80, 80, 80, 240);"
+    "  border-radius: 3px;"
     "  margin: 1px 2px;"
     "}"
+    "QPushButton {"
+    "  background-color: rgba(50, 50, 50, 255);"
+    "  border: 1px solid rgba(85, 85, 85, 255);"
+    "  border-radius: 3px;"
+    "  padding: 6px 8px;"
+    "}"
+    "QPushButton:checked { background-color: rgba(72, 72, 72, 255); }"
 )
 
 _THEME_CYCLE: dict[Theme, Theme] = {

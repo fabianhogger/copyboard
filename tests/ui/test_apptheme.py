@@ -5,13 +5,23 @@ from __future__ import annotations
 from PySide6.QtGui import QPalette
 from PySide6.QtWidgets import QApplication
 
-from copyboard.adapters.ui.apptheme import ThemeController, _dark_palette, next_theme
+from copyboard.adapters.ui.apptheme import (
+    _GLASS_STYLESHEET,
+    ThemeController,
+    _dark_palette,
+    next_theme,
+)
 from copyboard.config import Theme
 
 
 def test_dark_palette_uses_a_dark_window_colour(qt_app: QApplication) -> None:
     palette = _dark_palette()
     assert palette.color(QPalette.ColorRole.Window).lightness() < 128
+
+
+def test_translucent_theme_uses_flat_colours_without_gradients() -> None:
+    assert "qlineargradient" not in _GLASS_STYLESHEET
+    assert "background-color" in _GLASS_STYLESHEET
 
 
 def test_next_theme_cycles_dark_light_glass() -> None:

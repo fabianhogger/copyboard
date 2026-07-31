@@ -28,6 +28,8 @@ a live view of your recent clippings, so you can glance back and re-copy any of 
 2. **Live view** — a window listing recent clippings, newest first, each showing a preview
    (text snippet, URL, path, or image thumbnail) and its capture time.
 3. **Re-copy** — clicking a clipping puts it back on the system clipboard.
+   The clipping currently represented by the system clipboard is marked with a solid outline in the
+   viewer.
 4. **Delete** — a clipping can be removed from the view.
 5. **Retention** — the view keeps only recent clippings, bounded by **both**:
    - a maximum **count** (default **30**), and
@@ -35,6 +37,13 @@ a live view of your recent clippings, so you can glance back and re-copy any of 
    Both limits are configurable.
 6. **Background behavior** — the app lives in the **system tray** and captures continuously. A
    **global hotkey** (default **Ctrl+Shift+H**) and clicking the tray icon show/hide the viewer.
+
+7. **Stack paste mode (LIFO)** — synchronized checkable controls in the viewer and tray enable
+   destructive newest-first pasting.
+   Enabling it loads the newest clipping onto the system clipboard. After each native keyboard paste
+   (`Ctrl+V` on Windows/Linux, `Cmd+V` on macOS), the prepared clipping is removed from history and
+   the next-newest clipping is loaded. The final paste clears the clipboard. The mode is off by
+   default and disabling it leaves the current clipboard and remaining history unchanged.
 
 ## Configuration
 
@@ -66,6 +75,9 @@ partial files fall back to defaults (`copyboard/config.py`). Fields:
 - Image-size caps / advanced de-duplication.
 
 ## Known platform caveats
+
+Stack paste observes keyboard paste shortcuts only. Context-menu paste, middle-click paste, and mouse
+buttons mapped to Paste are not detected.
 
 - The `pynput` global hotkey needs **X11** on Linux (not native Wayland) and **Accessibility
   permission** on macOS. If the hotkey can't bind, the app still runs — use the tray icon to open the

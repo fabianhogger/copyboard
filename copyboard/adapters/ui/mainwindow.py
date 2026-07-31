@@ -24,6 +24,8 @@ class MainWindow(QWidget):
     """Shows the live clipping history and wires row actions back to the service."""
 
     _history_changed = Signal()
+    _stack_paste_mode_changed = Signal(bool)
+    _current_clipboard_clipping_changed = Signal()
 
     def __init__(
         self,
@@ -38,6 +40,12 @@ class MainWindow(QWidget):
         self.resize(500, 620)
 
         outer_layout = QVBoxLayout(self)
+        self._stack_paste_button = QPushButton()
+        self._stack_paste_button.setObjectName("stackPasteToggleButton")
+        self._stack_paste_button.setCheckable(True)
+        self._stack_paste_button.clicked.connect(self._service.set_stack_paste_mode_enabled)
+        outer_layout.addWidget(self._stack_paste_button)
+
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         self._list_container = QWidget()
@@ -49,7 +57,15 @@ class MainWindow(QWidget):
         outer_layout.addWidget(scroll_area)
 
         service.register_observer(self)
+        service.register_stack_paste_mode_observer(self)
+        service.register_current_clipboard_observer(self)
         self._history_changed.connect(
+            self._refresh_clipping_list, Qt.ConnectionType.QueuedConnection
+        )
+        self._stack_paste_mode_changed.connect(
+            self._synchronize_stack_paste_button, Qt.ConnectionType.QueuedConnection
+        )
+        self._current_clipboard_clipping_changed.connect(
             self._refresh_clipping_list, Qt.ConnectionType.QueuedConnection
         )
 
@@ -57,10 +73,17 @@ class MainWindow(QWidget):
         self._prune_timer.timeout.connect(self._service.remove_expired_clippings)
         self._prune_timer.start(prune_interval_ms)
 
+        self._synchronize_stack_paste_button(service.is_stack_paste_mode_enabled())
         self._refresh_clipping_list()
 
     def on_history_changed(self, event: HistoryChangeEvent) -> None:
         self._history_changed.emit()
+
+    def on_stack_paste_mode_changed(self, enabled: bool) -> None:
+        self._stack_paste_mode_changed.emit(enabled)
+
+    def on_current_clipboard_clipping_changed(self, clipping_id: str | None) -> None:
+        self._current_clipboard_clipping_changed.emit()
 
     def toggle_visibility(self) -> None:
         """Hide only when already frontmost; otherwise surface the window to the front.
@@ -106,6 +129,11 @@ class MainWindow(QWidget):
                 if col == 2:
                     col = 0
                     row += 1
+
+    def _synchronize_stack_paste_button(self, enabled: bool) -> None:
+        self._stack_paste_button.setChecked(enabled)
+        state_text = "On" if enabled else "Off"
+        self._stack_paste_button.setText(f"Stack paste: {state_text}")
 
     def _clear_list_layout(self) -> None:
         while self._list_layout.count():
