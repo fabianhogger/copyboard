@@ -56,4 +56,4 @@ class AppConfig:
     retention: RetentionPolicy = field(default_factory=RetentionPolicy)
     hotkey: HotkeyConfig = field(default_factory=HotkeyConfig)
     ui: UIConfig = field(default_factory=UIConfig)
-    theme: Theme = Theme.GLASS
+    theme: Theme = Theme.DARK

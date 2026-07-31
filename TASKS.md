@@ -45,6 +45,14 @@ Phase/step checklist. See [PLAN.md](PLAN.md) for full detail, [SPEC.md](SPEC.md)
 - [x] 6.2 Full `ruff` / `mypy` / `pytest` green across src + tests (42 files, 34 tests).
 - [x] 6.3 Backlog notes (below).
 
+## Phase 7 — Stack paste mode (LIFO)
+- [x] 7.1 Add application-level stack state that prepares, consumes, and removes the exact clipping.
+- [x] 7.2 Add clipboard clearing and preserve echo suppression for the final item.
+- [x] 7.3 Observe Ctrl+V on Windows/Linux and Cmd+V on macOS after chord release.
+- [x] 7.4 Add the checkable tray toggle and GUI-thread signal wiring.
+- [x] 7.5 Cover LIFO behavior, platform shortcuts, clipboard clearing, and tray state with tests.
+- [x] 7.6 Add a synchronized viewer toggle and replace gradient styling with flat neutral boxes.
+
 ## Backlog
 - Disk persistence (history surviving restart) — currently in-memory only.
 - A web front-end reusing the pure core (the hexagonal seam makes it possible).

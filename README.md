@@ -26,18 +26,31 @@ A scrollable list (newest first) with a timestamp and preview for each item. Ima
 - **Delete** — removes it from history immediately
 - **Drag** — drag any item directly into another app (text, URLs, paths, or image files)
 
+The item currently on the system clipboard has a simple solid outline. The outline follows new
+copies, row re-copy actions, and stack-paste advancement, and disappears when the clipboard is clear.
+
 **Global hotkey**  
 Press **Ctrl+Shift+H** (configurable) from any application to show or raise the viewer. Press again while the viewer is in the foreground to hide it.
+
+**Stack paste mode (LIFO)**
+
+Enable **Stack paste: On/Off** in the viewer or **Stack paste mode (LIFO)** in the tray menu to paste
+through history newest-first. Both controls stay synchronized. Copyboard
+preloads the newest clipping; after each normal **Ctrl+V** (Windows/Linux) or **Cmd+V** (macOS), that
+clipping is removed from history and the next-newest clipping is loaded. The final paste clears the
+clipboard. Turning the mode off leaves the current clipboard and remaining history untouched.
 
 **System-tray icon**  
 Click the tray icon to toggle the viewer. Right-click for the menu:
 - Show / hide viewer
+- Stack paste mode (LIFO)
 - Toggle light / dark theme
 - Edit config… (opens `config.json` in your default editor)
 - Quit Copyboard
 
 **Live theme toggle**  
-Switch between dark, light, and system themes from the tray menu — no restart needed.
+Switch themes from the tray menu — no restart needed. Colors use flat, neutral boxes without
+gradients; dark is the default.
 
 **Retention policy**  
 Both limits apply together: the history keeps at most `max_items` clippings **and** drops anything older than `max_age_minutes`. Pruning runs every second in the background.
@@ -94,6 +107,10 @@ You can open the config file directly from the tray menu via **Edit config…**
 If the hotkey fails to bind, the app still runs — use the tray icon to open the viewer.
 
 ## Development
+
+Stack paste advances only for keyboard paste shortcuts. Context-menu paste, middle-click paste, and
+mouse buttons mapped to Paste are not observed. Its keyboard listener has the same X11 requirement on
+Linux and Accessibility-permission requirement on macOS as the viewer hotkey.
 
 ```
 uv run ruff check .     # lint
