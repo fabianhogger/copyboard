@@ -8,6 +8,8 @@ choice so the tray can flip it live.
 
 from __future__ import annotations
 
+import sys
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication, QWidget
@@ -78,9 +80,25 @@ def apply_glass_window_effect(window: QWidget, enable: bool) -> None:
     applies an RGBA stylesheet so the window draws a semi-opaque dark tint instead of a solid fill.
     Clearing the stylesheet and the attribute restores normal opaque rendering.
 
+    On Windows, DWM only composites transparency for frameless windows, so ``FramelessWindowHint``
+    is added/removed alongside the attribute. ``setWindowFlags`` hides the window; if it was visible
+    before the flag change it is re-shown at the same position.
+
     Note: on X11 without a compositor the transparency will not show through — the window will
     simply look darker than normal because the attribute is set but not composited.
     """
+    if sys.platform == "win32":
+        was_visible = window.isVisible()
+        saved_pos = window.pos()
+        flags = window.windowFlags()
+        if enable:
+            flags |= Qt.WindowType.FramelessWindowHint
+        else:
+            flags &= ~Qt.WindowType.FramelessWindowHint
+        window.setWindowFlags(flags)
+        window.move(saved_pos)
+        if was_visible:
+            window.show()
     window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, enable)
     window.setStyleSheet(_GLASS_STYLESHEET if enable else "")
 
