@@ -37,6 +37,7 @@ class CopyboardService:
         self._clock = clock
         self._sink = sink
         self._observers = observers if observers is not None else ObserverRegistry()
+        self._current_clipboard_clipping_id: str | None = None
 
     def register_observer(self, observer: HistoryObserver) -> None:
         self._observers.register_observer(observer)
@@ -47,6 +48,7 @@ class CopyboardService:
         if clipping is None:
             return
         self._history.add_clipping(clipping)
+        self._current_clipboard_clipping_id = clipping.id
         self._observers.notify_all(ClippingAdded(clipping))
         self.remove_expired_clippings()
 
@@ -55,16 +57,25 @@ class CopyboardService:
         removed = self._history.enforce_retention(self._clock.now())
         if removed:
             self._observers.notify_all(HistoryPruned(tuple(removed)))
+        if any(clipping.id == self._current_clipboard_clipping_id for clipping in removed):
+            self._current_clipboard_clipping_id = None
 
     def recopy_clipping_by_id(self, clipping_id: str) -> None:
         clipping = self._history.find_clipping_by_id(clipping_id)
         if clipping is not None:
             self._sink.copy_clipping_to_system_clipboard(clipping)
+            self._current_clipboard_clipping_id = clipping.id
 
     def delete_clipping_by_id(self, clipping_id: str) -> None:
         clipping = self._history.find_clipping_by_id(clipping_id)
         if clipping is not None and self._history.remove_clipping_by_id(clipping_id):
             self._observers.notify_all(ClippingRemoved(clipping))
+            if self._current_clipboard_clipping_id == clipping_id:
+                self._current_clipboard_clipping_id = None
+
+    def get_current_clipboard_clipping_id(self) -> str | None:
+        """Id of the history clipping now on the system clipboard, or None if none is."""
+        return self._current_clipboard_clipping_id
 
     def pop_and_recopy_top_clipping(self) -> bool:
         """Copy the newest clipping to the system clipboard and remove it from history.
@@ -77,6 +88,7 @@ class CopyboardService:
         top = clippings[0]
         self._sink.copy_clipping_to_system_clipboard(top)
         self._history.remove_clipping_by_id(top.id)
+        self._current_clipboard_clipping_id = None
         self._observers.notify_all(ClippingRemoved(top))
         return True
 

@@ -36,6 +36,9 @@ class MainWindow(QWidget):
         self._ui_config = ui_config or UIConfig()
         self.setWindowTitle("Copyboard")
         self.resize(500, 620)
+        # Required for Qt to paint the glass theme's stylesheet `background`/`border` on this plain
+        # QWidget subclass; without it the translucent gradient frame is never drawn.
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         outer_layout = QVBoxLayout(self)
         scroll_area = QScrollArea()
@@ -84,6 +87,7 @@ class MainWindow(QWidget):
 
     def _refresh_clipping_list(self) -> None:
         self._clear_list_layout()
+        current_clipboard_id = self._service.get_current_clipboard_clipping_id()
         row, col = 0, 0
         for clipping in self._service.list_clippings_newest_first():
             wide = isinstance(clipping, ImageClipping)
@@ -93,6 +97,7 @@ class MainWindow(QWidget):
                 self._service.delete_clipping_by_id,
                 actions_on_right_click=self._ui_config.actions_on_right_click,
                 wide=wide,
+                is_current_clipboard_item=clipping.id == current_clipboard_id,
             )
             if wide:
                 if col == 1:  # flush the half-filled row before spanning
