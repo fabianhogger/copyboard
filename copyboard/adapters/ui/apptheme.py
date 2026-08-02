@@ -32,7 +32,7 @@ _GLASS_STYLESHEET = (
     "    stop:0.040 rgba(100, 145, 235,  55),"  # glow fades
     "    stop:0.085 rgba(255, 255, 255,  28),"  # transitions to frosted-white body
     "    stop:0.500 rgba(255, 255, 255,  18),"  # mid-body
-    "    stop:1.000 rgba(255, 255, 255,  10));" # slight lift toward the bottom (reflected table)
+    "    stop:1.000 rgba(255, 255, 255,  10));"  # slight lift toward the bottom (reflected table)
     "  border-top:    1px solid rgba(200, 225, 255, 160);"  # lit rim
     "  border-left:   1px solid rgba(150, 185, 255,  90);"
     "  border-right:  1px solid rgba( 80, 115, 210,  60);"
