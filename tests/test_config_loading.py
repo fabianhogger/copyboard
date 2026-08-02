@@ -50,8 +50,8 @@ def test_partial_config_falls_back_to_defaults(tmp_path: Path) -> None:
     assert config.hotkey == AppConfig().hotkey
 
 
-def test_default_theme_is_dark() -> None:
-    assert AppConfig().theme is Theme.DARK
+def test_default_theme_is_glass() -> None:
+    assert AppConfig().theme is Theme.GLASS
 
 
 @pytest.mark.parametrize(
@@ -60,7 +60,7 @@ def test_default_theme_is_dark() -> None:
         ("light", Theme.LIGHT),
         ("system", Theme.SYSTEM),
         ("DARK", Theme.DARK),
-        ("nonsense", Theme.DARK),  # unknown value falls back to the configured default
+        ("nonsense", Theme.GLASS),  # unknown value falls back to the configured default
     ],
 )
 def test_theme_is_parsed_case_insensitively_with_fallback(

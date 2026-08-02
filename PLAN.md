@@ -245,15 +245,6 @@ subclassing, because time-pruning needs to scan).
 - **6.2** Full `uv run ruff check`, `uv run mypy .`, `uv run pytest` green across src + tests.
 - **6.3** Backlog notes (config file, thumbnail/image-size caps, persistence, cross-platform clipboard adapter).
 
-### PHASE 7 — Stack paste mode (LIFO)
-- **7.1** Extend `CopyboardService` with off-by-default stack state and exact prepared-clipping tracking.
-- **7.2** Extend `ClipboardSink`/`QtClipboardSink` with guarded clipboard clearing for stack exhaustion.
-- **7.3** Add `PynputPasteObserver`: Ctrl+V on Windows/Linux, Cmd+V on macOS, callback after release.
-- **7.4** Add the checkable tray action and marshal paste callbacks onto the Qt GUI thread.
-- **7.5** Test LIFO consumption, re-copy/delete interactions, empty clipboard safety, platform mapping,
-  and tray state; document keyboard-only paste observation.
-- **7.6** Add synchronized viewer/tray controls and use flat neutral box styling without gradients.
-
 ## Verification
 
 - **Core (automated, no display needed):** `uv run pytest` — classifier picks correct kinds;

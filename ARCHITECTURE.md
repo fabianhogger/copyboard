@@ -83,25 +83,6 @@ copyboard/
   `pynput`, running a listener thread; its callback is marshaled onto the Qt GUI thread by a queued
   signal. Lives outside the domain (an interaction concern, not business logic).
 
-## Stack paste flow
-
-`CopyboardService` owns the off-by-default stack state and the ID of the exact clipping prepared on
-the clipboard. The same current-clipping ID drives the viewer's solid clipboard-item outline during
-normal capture and re-copy operations. It notifies UI observers when either state changes, keeping
-the row outline, viewer button, and tray action synchronized.
-Enabling either control copies the newest clipping. `PynputPasteObserver` watches the
-native Ctrl+V shortcut on Windows/Linux or Cmd+V on macOS without suppressing it. On chord release,
-the composition root queues a GUI-thread call that removes the prepared clipping, notifies history
-observers, and copies the next-newest item through `ClipboardSink`. Exhausting the history calls
-`ClipboardSink.clear_system_clipboard()`; the shared `ClipboardEchoGuard` prevents those internal
-writes and clears from being captured again.
-
-The keyboard observer remains an adapter: neither `domain/` nor `application/` imports `pynput` or
-Qt. Context-menu and mouse paste actions are intentionally outside this portable interaction seam.
-
-UI themes use a shared palette plus flat, uniform box fills. No stylesheet uses color gradients;
-dark is the default theme.
-
 ## Supporting patterns
 
 **Observer** (service → UI change notifications), **Strategy/polymorphism** (the `Clipping` hierarchy +

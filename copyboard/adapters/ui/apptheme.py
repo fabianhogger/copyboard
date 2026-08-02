@@ -1,14 +1,13 @@
-"""Apply flat light, dark, and translucent colour themes to the Qt application.
+"""Apply a light/dark/glass colour theme to the Qt application.
 
 Uses the Fusion style plus an explicit :class:`QPalette` so the look is identical on every platform
 (Windows, Linux, macOS). ``Theme.SYSTEM`` leaves Qt's native palette untouched. ``Theme.GLASS``
-uses uniform translucent fills without gradients. A :class:`ThemeController` keeps the current
+additionally sets ``WA_TranslucentBackground`` on the viewer window and applies an RGBA stylesheet
+so the desktop shows through the window background. A :class:`ThemeController` keeps the current
 choice so the tray can flip it live.
 """
 
 from __future__ import annotations
-
-import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPalette
@@ -18,6 +17,14 @@ from copyboard.config import Theme
 
 _FUSION_STYLE = "Fusion"
 
+# Glass theme stylesheet applied to the viewer window.
+#
+# The illusion rests on three layers:
+#   1. Window gradient — a blue-white glint at the very top rim that transitions into a frosted-
+#      white body, making the window visible even when the list is empty.
+#   2. Directional borders — bright on top/left (light source), dim on right/bottom (shadow side).
+#   3. Row tiles — each ClippingWidget uses a more opaque frosted gradient so it floats above the
+#      window body with its own bright top-edge highlight.
 _GLASS_STYLESHEET = (
     "MainWindow {"
     "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
@@ -25,7 +32,7 @@ _GLASS_STYLESHEET = (
     "    stop:0.040 rgba(100, 145, 235,  55),"  # glow fades
     "    stop:0.085 rgba(255, 255, 255,  28),"  # transitions to frosted-white body
     "    stop:0.500 rgba(255, 255, 255,  18),"  # mid-body
-    "    stop:1.000 rgba(255, 255, 255,  10));"  # slight lift toward the bottom (reflected table)
+    "    stop:1.000 rgba(255, 255, 255,  10));" # slight lift toward the bottom (reflected table)
     "  border-top:    1px solid rgba(200, 225, 255, 160);"  # lit rim
     "  border-left:   1px solid rgba(150, 185, 255,  90);"
     "  border-right:  1px solid rgba( 80, 115, 210,  60);"
@@ -34,19 +41,19 @@ _GLASS_STYLESHEET = (
     "}"
     "QScrollArea { background: transparent; border: none; }"
     "QScrollArea > QWidget > QWidget { background: transparent; }"
+    # Row tiles — more opaque than the window body so they visibly float above it.
     "ClippingWidget {"
-    "  background-color: rgba(43, 43, 43, 245);"
-    "  border: 1px solid rgba(80, 80, 80, 240);"
-    "  border-radius: 3px;"
+    "  background: qlineargradient(x1:0, y1:0, x2:0, y2:1,"
+    "    stop:0.0 rgba(255, 255, 255, 42),"
+    "    stop:0.4 rgba(255, 255, 255, 22),"
+    "    stop:1.0 rgba(255, 255, 255, 10));"
+    "  border-top:    1px solid rgba(255, 255, 255, 70);"  # top highlight — catches light
+    "  border-left:   1px solid rgba(255, 255, 255, 35);"
+    "  border-right:  1px solid rgba(0,   0,   0,   20);"
+    "  border-bottom: 1px solid rgba(0,   0,   0,   28);"
+    "  border-radius: 4px;"
     "  margin: 1px 2px;"
     "}"
-    "QPushButton {"
-    "  background-color: rgba(50, 50, 50, 255);"
-    "  border: 1px solid rgba(85, 85, 85, 255);"
-    "  border-radius: 3px;"
-    "  padding: 6px 8px;"
-    "}"
-    "QPushButton:checked { background-color: rgba(72, 72, 72, 255); }"
 )
 
 _THEME_CYCLE: dict[Theme, Theme] = {
@@ -80,25 +87,9 @@ def apply_glass_window_effect(window: QWidget, enable: bool) -> None:
     applies an RGBA stylesheet so the window draws a semi-opaque dark tint instead of a solid fill.
     Clearing the stylesheet and the attribute restores normal opaque rendering.
 
-    On Windows, DWM only composites transparency for frameless windows, so ``FramelessWindowHint``
-    is added/removed alongside the attribute. ``setWindowFlags`` hides the window; if it was visible
-    before the flag change it is re-shown at the same position.
-
     Note: on X11 without a compositor the transparency will not show through — the window will
     simply look darker than normal because the attribute is set but not composited.
     """
-    if sys.platform == "win32":
-        was_visible = window.isVisible()
-        saved_pos = window.pos()
-        flags = window.windowFlags()
-        if enable:
-            flags |= Qt.WindowType.FramelessWindowHint
-        else:
-            flags &= ~Qt.WindowType.FramelessWindowHint
-        window.setWindowFlags(flags)
-        window.move(saved_pos)
-        if was_visible:
-            window.show()
     window.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, enable)
     window.setStyleSheet(_GLASS_STYLESHEET if enable else "")
 

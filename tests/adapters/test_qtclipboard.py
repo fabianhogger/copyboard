@@ -10,7 +10,7 @@ from PySide6.QtGui import QColor, QImage
 from PySide6.QtWidgets import QApplication
 
 from copyboard.adapters.clipboardechoguard import ClipboardEchoGuard
-from copyboard.adapters.qt.qtclipboard import QtClipboardSink, QtClipboardSource
+from copyboard.adapters.qt.qtclipboard import QtClipboardSource
 from copyboard.domain.content import RawClipboardData
 
 
@@ -45,32 +45,3 @@ def test_image_on_clipboard_is_captured_and_encoded(qt_app: QApplication) -> Non
     assert content.image is not None
     assert content.image.size_bytes > 0
     assert content.image.image_format == "png"
-
-
-def test_external_clipboard_clear_is_reported_as_empty_content(qt_app: QApplication) -> None:
-    clipboard = qt_app.clipboard()
-    source = QtClipboardSource(clipboard, ClipboardEchoGuard())
-    received: list[RawClipboardData] = []
-    source.set_new_content_listener(received.append)
-    clipboard.setText("temporary")
-
-    clipboard.clear()
-    source._handle_clipboard_data_changed()
-
-    assert received[-1].is_empty()
-
-
-def test_sink_clear_consumes_echo_guard_before_next_external_copy(qt_app: QApplication) -> None:
-    clipboard = qt_app.clipboard()
-    echo_guard = ClipboardEchoGuard()
-    source = QtClipboardSource(clipboard, echo_guard)
-    sink = QtClipboardSink(clipboard, echo_guard)
-    received: list[RawClipboardData] = []
-    source.set_new_content_listener(received.append)
-
-    sink.clear_system_clipboard()
-    source._handle_clipboard_data_changed()
-    clipboard.setText("next external copy")
-    source._handle_clipboard_data_changed()
-
-    assert received[-1].text == "next external copy"

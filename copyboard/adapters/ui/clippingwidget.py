@@ -15,15 +15,7 @@ from collections.abc import Callable
 
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QContextMenuEvent, QDrag, QMouseEvent, QPixmap
-from PySide6.QtWidgets import (
-    QApplication,
-    QHBoxLayout,
-    QLabel,
-    QMenu,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QMenu, QPushButton, QVBoxLayout, QWidget
 
 from copyboard.adapters.qt.clippingdragdata import build_drag_mime_data
 from copyboard.domain.clipping import Clipping, ImageClipping
@@ -48,11 +40,6 @@ class ClippingWidget(QWidget):
         super().__init__()
         # Required for Qt to paint a stylesheet `background` on a plain QWidget subclass.
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setProperty("currentClipboardItem", is_current_clipboard_item)
-        if is_current_clipboard_item:
-            self.setObjectName("currentClipboardClipping")
-            self.setStyleSheet(_CURRENT_CLIPBOARD_BORDER_STYLESHEET)
-            self.setToolTip("Currently on the system clipboard")
         self._clipping_id = clipping.id
         self._clipboard_payload = clipping.to_clipboard_payload()
         self._on_recopy = on_recopy

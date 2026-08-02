@@ -38,13 +38,9 @@ class FakeClipboardSink:
 
     def __init__(self) -> None:
         self.copied_clippings: list[Clipping] = []
-        self.clear_count = 0
 
     def copy_clipping_to_system_clipboard(self, clipping: Clipping) -> None:
         self.copied_clippings.append(clipping)
-
-    def clear_system_clipboard(self) -> None:
-        self.clear_count += 1
 
 
 class RecordingHistoryObserver:
@@ -55,23 +51,3 @@ class RecordingHistoryObserver:
 
     def on_history_changed(self, event: HistoryChangeEvent) -> None:
         self.events.append(event)
-
-
-class RecordingStackPasteModeObserver:
-    """Records stack-paste mode changes from the application service."""
-
-    def __init__(self) -> None:
-        self.enabled_states: list[bool] = []
-
-    def on_stack_paste_mode_changed(self, enabled: bool) -> None:
-        self.enabled_states.append(enabled)
-
-
-class RecordingCurrentClipboardObserver:
-    """Records which history item the service considers current on the clipboard."""
-
-    def __init__(self) -> None:
-        self.clipping_ids: list[str | None] = []
-
-    def on_current_clipboard_clipping_changed(self, clipping_id: str | None) -> None:
-        self.clipping_ids.append(clipping_id)
